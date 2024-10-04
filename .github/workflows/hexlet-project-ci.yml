@@ -1,0 +1,20 @@
+name: hexlet-project-ci
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: install dependencies
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Run install
+        run: make install
+
+      - name: Linter
+        run: make lint
