@@ -16,3 +16,6 @@ install:
 
 validate:
 	composer validate
+
+export-environments:
+	export DATABASE_URL=postgresql://ucsus:OAYiap3jKxWXzRpeFfQFalpDDm8Ig4IX@dpg-cs18om8gph6c73ai2gug-a.oregon-postgres.render.com/hexlet_project_uk33
