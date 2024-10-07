@@ -24,12 +24,12 @@ $container->set('flash', function () {
 
 $container->set(\PDO::class, function () {
     $dbUrl = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL');
-    $scheme = null;
-    $user = '';
-    $password = '';
-    $host = null;
-    $port = null;
-    $dbName = null;
+    $scheme = 'pgsql';
+    $user = 'ucsus';
+    $password = 'Gbafujh14';
+    $host = 'localhost';
+    $port = 5432;
+    $dbName = 'hexlet';
     $conn = null;
 
     if ($dbUrl) {
@@ -40,13 +40,10 @@ $container->set(\PDO::class, function () {
         $host = $databaseUrl['host'];
         $port = $databaseUrl['port'];
         $dbName = ltrim($databaseUrl['path'], '/');
-    } else {
-        $scheme = 'pgsql';
-        $host = 'localhost';
-        $port = 5432;
-        $dbName = 'hexlet';
     }
+
     $dsn = Connection::buildDsn($scheme, $host, $port, $dbName);
+
     try {
         $conn = new \PDO($dsn, $user, $password);
         $conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -60,6 +57,7 @@ $container->set(\PDO::class, function () {
     return $conn;
 });
 $app = AppFactory::createFromContainer($container);
+$router = $app->getRouteCollector()->getRouteParser();
 $app->add(MethodOverrideMiddleware::class);
 // Add Twig-View Middleware
 $app->add(TwigMiddleware::create($app, $container->get(Twig::class)));
@@ -70,7 +68,6 @@ $app->addErrorMiddleware(true, true, true);
 
 $app->get('/', function ($request, $response) {
     $twig = $this->get(Twig::class);
-    dump($this->get(\PDO::class));
     return $twig->render($response, 'main.html.twig',
         [
             'errors' => [],
@@ -78,4 +75,12 @@ $app->get('/', function ($request, $response) {
         ]);
 })->setName('home');
 
+$app->get();
+
+$app->post('/urls', function ($request, $response) use ($router) {
+    $data = $request->getParsedBodyParam('url');
+    $v = new Valitron\Validator($data);
+    $v->rule('required', 'name')->rule('url', 'name')->rule('length', 'name', 255);
+
+});
 $app->run();
