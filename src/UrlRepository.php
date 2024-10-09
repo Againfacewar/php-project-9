@@ -9,6 +9,7 @@ class UrlRepository
     public function __construct(\PDO $conn)
     {
         $this->conn = $conn;
+        session_start();
     }
 
     public function listUrls(): array
@@ -33,7 +34,7 @@ class UrlRepository
         $stmt->execute([$id]);
 
         if ($row = $stmt->fetch())  {
-            $url = Url::fromArray([$row['name'], $row['createdAt']]);
+            $url = Url::fromArray([$row['name'], $row['created_at']]);
             $url->setId($row['id']);
             return $url;
         }
@@ -48,7 +49,7 @@ class UrlRepository
         $stmt->execute([$name]);
 
         if ($row = $stmt->fetch())  {
-            $url = Url::fromArray([$row['name'], $row['createdAt']]);
+            $url = Url::fromArray([$row['name'], $row['created_at']]);
             $url->setId($row['id']);
             return $url;
         }

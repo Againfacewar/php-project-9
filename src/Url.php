@@ -12,9 +12,10 @@ class Url
 
     public static function fromArray(array $data): Url
     {
+        [$name, $createdAt] = $data;
         $url = new Url();
-        $url->setName($data['name']);
-        $url->setCreatedAt($data['createdAt']);
+        $url->setName($name);
+        $url->setCreatedAt($createdAt);
 
         return $url;
     }
@@ -56,7 +57,7 @@ class Url
 
     public static function normalizeUrl(string $url): string
     {
-        $parsedUrl = parse_url($url);
+        $parsedUrl = parse_url(trim($url));
 
         return "{$parsedUrl['scheme']}://{$parsedUrl['host']}";
     }

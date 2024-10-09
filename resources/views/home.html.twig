@@ -14,7 +14,7 @@
                                class="form-control form-control-lg {{ errors.name is defined ? 'is-invalid' : '' }}" placeholder="https://www.example.com">
                         {% if errors.name is defined %}
                         <div class="invalid-feedback">
-                            {{ errors.name }}
+                            {{ errors.name[0] }}
                         </div>
                         {% endif %}
                     </div>

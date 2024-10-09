@@ -1,5 +1,8 @@
 {% extends 'main.html.twig' %}
 {% block title %}Анализатор страниц{% endblock %}
 {% block content %}
-
+заебись
+    {% if flash is defined %}
+        {{ flash.success[0] }}
+    {% endif %}
 {% endblock %}

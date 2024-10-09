@@ -3,6 +3,7 @@
 // Подключение автозагрузки через composer
 require __DIR__ . '/../vendor/autoload.php';
 
+use Carbon\Carbon;
 use DI\Container;
 use Dotenv\Dotenv;
 use Hexlet\Code\Connection;
@@ -31,7 +32,7 @@ $container->set(\PDO::class, function () {
     $dbUrl = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL');
     try {
         $conn = Connection::connect($dbUrl);
-        dump('Соединение установлено!');
+//        dump('Соединение установлено!');
 
         return $conn;
     } catch (\PDOException $e) {
@@ -58,7 +59,7 @@ $app->get('/', function ($request, $response) {
         ]);
 })->setName('home');
 
-$app->get('urls/{id}', function ($request, $response, $args) {
+$app->get('/urls/{id}', function ($request, $response, $args) {
     $twig = $this->get(Twig::class);
     $urlRepository = $this->get(UrlRepository::class);
     $id = $args['id'];
@@ -67,7 +68,6 @@ $app->get('urls/{id}', function ($request, $response, $args) {
     if (is_null($url)) {
         return $response->write('Page not found')->withStatus(404);
     }
-
     $messages = $this->get('flash')->getMessages();
 
     return $twig->render($response, 'show.html.twig',
@@ -75,14 +75,33 @@ $app->get('urls/{id}', function ($request, $response, $args) {
         'url' => $url,
         'flash' => $messages
     ]);
-});
+})->setName('urls.show');
 
 $app->post('/urls', function ($request, $response) use ($router) {
     $urlRepository = $this->get(UrlRepository::class);
-    $url = Url::normalizeUrl($request->getParsedBodyParam('url')['name']);
+    $data = $request->getParsedBodyParam('url');
+    $twig = $this->get(Twig::class);
+    $v = new Valitron\Validator($data);
+    $v->rule('required', 'name')->message('URL не может быть пустым')->rule('url', 'name')->message('Некорректный URL')->rule('lengthMax', 'name', 255)->message('URL не должен привышать 255 символов');
 
-    $v = new Valitron\Validator(['name' => $url]);
-    $v->rule('required', 'name')->message('URL не может быть пустым')->rule('url', 'name')->message('Некорректный URL')->rule('length', 'name', 255)->message('URL не должен привышать 255 символов');
+    if ($v->validate()) {
+        $data['name'] = Url::normalizeUrl($data['name']);
+        $url = $urlRepository->findByName($data['name']);
+        if ($url) {
+            $this->get('flash')->addMessage('success', 'Страница уже существует!');
+        } else {
+            $url = Url::fromArray([$data['name'], Carbon::now()]);
+            $urlRepository->save($url);
+            $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
+        }
 
+        return $response->withRedirect($router->urlFor('urls.show', ['id' => $url->getId()]));
+    }
+
+    return $twig->render($response, 'home.html.twig',
+        [
+            'errors' => $v->errors(),
+            'url' => $data
+        ]);
 })->setName('urls.store');
 $app->run();
