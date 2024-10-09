@@ -41,6 +41,21 @@ class UrlRepository
         return null;
     }
 
+    public function findByName(string $name): ?Url
+    {
+        $sql = 'SELECT * FROM urls WHERE name = ? LIMIT 1';
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$name]);
+
+        if ($row = $stmt->fetch())  {
+            $url = Url::fromArray([$row['name'], $row['createdAt']]);
+            $url->setId($row['id']);
+            return $url;
+        }
+
+        return null;
+    }
+
     public function save(Url $url): void
     {
         if ($url->exists()) {

@@ -4,7 +4,10 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 use DI\Container;
+use Dotenv\Dotenv;
 use Hexlet\Code\Connection;
+use Hexlet\Code\Url;
+use Hexlet\Code\UrlRepository;
 use Slim\Factory\AppFactory;
 use Slim\Flash\Messages;
 use Slim\Http\Response;
@@ -23,38 +26,18 @@ $container->set('flash', function () {
 });
 
 $container->set(\PDO::class, function () {
+    $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+    $dotenv->load();
     $dbUrl = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL');
-    $scheme = 'pgsql';
-    $user = 'ucsus';
-    $password = 'Gbafujh14';
-    $host = 'localhost';
-    $port = 5432;
-    $dbName = 'hexlet';
-    $conn = null;
-
-    if ($dbUrl) {
-        $databaseUrl = parse_url($dbUrl);
-        $scheme = $databaseUrl['scheme'] ?? 'pgsql';
-        $user = $databaseUrl['user'];
-        $password = $databaseUrl['pass'];
-        $host = $databaseUrl['host'];
-        $port = $databaseUrl['port'];
-        $dbName = ltrim($databaseUrl['path'], '/');
-    }
-
-    $dsn = Connection::buildDsn($scheme, $host, $port, $dbName);
-
     try {
-        $conn = new \PDO($dsn, $user, $password);
-        $conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $conn->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+        $conn = Connection::connect($dbUrl);
+        dump('Соединение установлено!');
 
-        echo "Соединение установлено!";
+        return $conn;
     } catch (\PDOException $e) {
-        echo "Ошибка подключения: " . $e->getMessage();
+        dump($e->getMessage());
     }
 
-    return $conn;
 });
 $app = AppFactory::createFromContainer($container);
 $router = $app->getRouteCollector()->getRouteParser();
@@ -68,19 +51,38 @@ $app->addErrorMiddleware(true, true, true);
 
 $app->get('/', function ($request, $response) {
     $twig = $this->get(Twig::class);
-    return $twig->render($response, 'main.html.twig',
+    return $twig->render($response, 'home.html.twig',
         [
             'errors' => [],
             'url' => []
         ]);
 })->setName('home');
 
-$app->get();
+$app->get('urls/{id}', function ($request, $response, $args) {
+    $twig = $this->get(Twig::class);
+    $urlRepository = $this->get(UrlRepository::class);
+    $id = $args['id'];
+    $url = $urlRepository->find($id);
+
+    if (is_null($url)) {
+        return $response->write('Page not found')->withStatus(404);
+    }
+
+    $messages = $this->get('flash')->getMessages();
+
+    return $twig->render($response, 'show.html.twig',
+    [
+        'url' => $url,
+        'flash' => $messages
+    ]);
+});
 
 $app->post('/urls', function ($request, $response) use ($router) {
-    $data = $request->getParsedBodyParam('url');
-    $v = new Valitron\Validator($data);
-    $v->rule('required', 'name')->rule('url', 'name')->rule('length', 'name', 255);
+    $urlRepository = $this->get(UrlRepository::class);
+    $url = Url::normalizeUrl($request->getParsedBodyParam('url')['name']);
 
-});
+    $v = new Valitron\Validator(['name' => $url]);
+    $v->rule('required', 'name')->message('URL не может быть пустым')->rule('url', 'name')->message('Некорректный URL')->rule('length', 'name', 255)->message('URL не должен привышать 255 символов');
+
+})->setName('urls.store');
 $app->run();

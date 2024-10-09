@@ -1,0 +1,29 @@
+{% extends 'main.html.twig' %}
+{% block title %}Анализатор страниц{% endblock %}
+{% block content %}
+<section class="container-lg mt-3">
+    <div class="row">
+        <div class="col-12 col-md-10 col-lg-8 mx-auto border rounded-3 bg-light p-5">
+            <h1 class="display-3">Анализатор страниц</h1>
+            <p class="lead">Бесплатно проверяйте сайты на SEO пригодность</p>
+            <form action="{{ url_for('urls.store') }}" method="post" required>
+                <div class="d-flex gap-2 justify-content-between">
+                    <div class="w-100">
+                        <label for="text" class="visually-hidden">Url для проверки</label>
+                        <input type="text" name="url[name]" value="{{ url['name']|default('') }}"
+                               class="form-control form-control-lg {{ errors.name is defined ? 'is-invalid' : '' }}" placeholder="https://www.example.com">
+                        {% if errors.name is defined %}
+                        <div class="invalid-feedback">
+                            {{ errors.name }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <input type="submit" class="btn btn-primary btn-lg ms-3 px-5 text-uppercase" value="Проверить">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
