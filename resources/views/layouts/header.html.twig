@@ -10,7 +10,7 @@
                     <a class="nav-link {% if is_current_url('home') %}active{% endif %}" href="/">Главная</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Сайты</a>
+                    <a class="nav-link {% if is_current_url('urls.index') %}active{% endif %}" href="{{ url_for('urls.index') }}">Сайты</a>
                 </li>
             </ul>
         </div>

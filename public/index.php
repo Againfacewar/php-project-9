@@ -32,13 +32,11 @@ $container->set(\PDO::class, function () {
     $dbUrl = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL');
     try {
         $conn = Connection::connect($dbUrl);
-//        dump('Соединение установлено!');
 
         return $conn;
     } catch (\PDOException $e) {
         dump($e->getMessage());
     }
-
 });
 $app = AppFactory::createFromContainer($container);
 $router = $app->getRouteCollector()->getRouteParser();
@@ -52,11 +50,14 @@ $app->addErrorMiddleware(true, true, true);
 
 $app->get('/', function ($request, $response) {
     $twig = $this->get(Twig::class);
-    return $twig->render($response, 'home.html.twig',
+    return $twig->render(
+        $response,
+        'home.html.twig',
         [
             'errors' => [],
             'url' => []
-        ]);
+        ]
+    );
 })->setName('home');
 
 $app->get('/urls/{id}', function ($request, $response, $args) {
@@ -70,11 +71,14 @@ $app->get('/urls/{id}', function ($request, $response, $args) {
     }
     $messages = $this->get('flash')->getMessages();
 
-    return $twig->render($response, 'show.html.twig',
-    [
+    return $twig->render(
+        $response,
+        'show.html.twig',
+        [
         'url' => $url,
         'flash' => $messages
-    ]);
+        ]
+    );
 })->setName('urls.show');
 
 $app->post('/urls', function ($request, $response) use ($router) {
@@ -82,7 +86,12 @@ $app->post('/urls', function ($request, $response) use ($router) {
     $data = $request->getParsedBodyParam('url');
     $twig = $this->get(Twig::class);
     $v = new Valitron\Validator($data);
-    $v->rule('required', 'name')->message('URL не может быть пустым')->rule('url', 'name')->message('Некорректный URL')->rule('lengthMax', 'name', 255)->message('URL не должен привышать 255 символов');
+    $v->rule('required', 'name')
+        ->message('URL не может быть пустым')
+        ->rule('url', 'name')
+        ->message('Некорректный URL')
+        ->rule('lengthMax', 'name', 255)
+        ->message('URL не должен привышать 255 символов');
 
     if ($v->validate()) {
         $data['name'] = Url::normalizeUrl($data['name']);
@@ -98,10 +107,28 @@ $app->post('/urls', function ($request, $response) use ($router) {
         return $response->withRedirect($router->urlFor('urls.show', ['id' => $url->getId()]));
     }
 
-    return $twig->render($response, 'home.html.twig',
+    return $twig->render(
+        $response->withStatus(422),
+        'home.html.twig',
         [
             'errors' => $v->errors(),
             'url' => $data
-        ]);
+        ]
+    );
 })->setName('urls.store');
+
+$app->get('/urls', function ($request, $response) {
+    $twig = $this->get(Twig::class);
+    $urls = $this->get(UrlRepository::class)->listUrls();
+
+
+    return $twig->render(
+        $response,
+        'index.html.twig',
+        [
+            'urls' => $urls
+        ]
+    );
+})->setName('urls.index');
+
 $app->run();

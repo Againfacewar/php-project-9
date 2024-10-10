@@ -14,13 +14,13 @@ class UrlRepository
 
     public function listUrls(): array
     {
-        $sql = 'SELECT * FROM urls';
+        $sql = 'SELECT * FROM urls ORDER BY created_at DESC';
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         $urls = [];
 
-        if ($row = $stmt->fetch()) {
-            $url = Url::fromArray([$row['name'], $row['createdAt']]);
+        while ($row = $stmt->fetch()) {
+            $url = Url::fromArray([$row['name'], $row['created_at']]);
             $url->setId($row['id']);
             $urls[] = $url;
         }
@@ -33,7 +33,7 @@ class UrlRepository
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$id]);
 
-        if ($row = $stmt->fetch())  {
+        if ($row = $stmt->fetch()) {
             $url = Url::fromArray([$row['name'], $row['created_at']]);
             $url->setId($row['id']);
             return $url;
@@ -48,7 +48,7 @@ class UrlRepository
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$name]);
 
-        if ($row = $stmt->fetch())  {
+        if ($row = $stmt->fetch()) {
             $url = Url::fromArray([$row['name'], $row['created_at']]);
             $url->setId($row['id']);
             return $url;

@@ -1,5 +1,35 @@
 {% extends 'main.html.twig' %}
 {% block title %}Анализатор страниц{% endblock %}
 {% block content %}
-
+<section class="container-lg mt-3">
+    <div class="title">
+        <h1>Сайты</h1>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover text-nowrap" data-test="urls">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Имя</th>
+                <th>Последняя проверка</th>
+                <th>Код ответа</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for url in urls %}
+            <tr>
+                <td>{{ url.getId() }}</td>
+                <td>
+                    <a href="{{ url_for('urls.show', {'id': url.getId()}) }}">
+                        {{ url.getName() }}
+                    </a>
+                </td>
+                <td></td>
+                <td></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
 {% endblock %}

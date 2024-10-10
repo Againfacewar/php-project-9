@@ -1,8 +1,56 @@
 {% extends 'main.html.twig' %}
 {% block title %}Анализатор страниц{% endblock %}
 {% block content %}
-заебись
-    {% if flash is defined %}
-        {{ flash.success[0] }}
+    {% if flash.success is defined %}
+        <div class="alert alert-success" role="alert">
+            {{ flash.success[0] }}
+        </div>
     {% endif %}
+    <section class="container-lg mt-3">
+        <div>
+            <h1>Сайт: {{ url.getName() }}</h1>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover text-nowrap" data-test="url">
+                <tbody>
+                <tr>
+                    <td>ID</td>
+                    <td>{{ url.getId() }}</td>
+                </tr>
+                <tr>
+                    <td>Имя</td>
+                    <td>{{ url.getName() }}</td>
+                </tr>
+                <tr>
+                    <td>Дата создания</td>
+                    <td>{{ url.getCreatedAt() }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-5 mb-3">
+            <h2>Проверки</h2>
+        </div>
+{#        <form method="post" action="{{ url_for('urls.check', {'id' : url.getId()}) }}">#}
+{#            <input type="submit" class="btn btn-primary" value="Запустить проверку">#}
+{#        </form>#}
+        <form method="post" action="" class="mb-3">
+            <input type="submit" class="btn btn-primary" value="Запустить проверку">
+        </form>
+        <table class="table table-bordered table-hover" data-test="checks">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Код ответа</th>
+                <th>h1</th>
+                <th>title</th>
+                <th>description</th>
+                <th>Дата создания</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </section>
 {% endblock %}
