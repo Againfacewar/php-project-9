@@ -35,7 +35,7 @@ $container->set(\PDO::class, function () {
 
         return $conn;
     } catch (\PDOException $e) {
-        dump($e->getMessage());
+        error_log($e->getMessage());
     }
 });
 $app = AppFactory::createFromContainer($container);

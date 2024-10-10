@@ -24,7 +24,7 @@ class Connection
             $port = $_ENV['DB_PORT'] ?? getenv('DB_PORT');
             $dbName = $_ENV['DB_DATABASE'] ?? getenv('DB_DATABASE');
         } catch (InvalidPathException $e) {
-            echo $e->getMessage();
+            error_log($e->getMessage());
         }
 
         if ($dbUrl) {
