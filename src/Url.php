@@ -6,6 +6,7 @@ use Carbon\Carbon;
 
 class Url
 {
+    private array $urlsCheck = [];
     private ?int $id = null;
     private ?string $name = null;
     private ?string $created_at = null;
@@ -35,6 +36,21 @@ class Url
         return $this->created_at;
     }
 
+    public function getUrlChecks(): ?array
+    {
+        return $this->urlsCheck;
+    }
+
+    public function getLastUrlCheck(): ?UrlCheck
+    {
+        return $this->urlsCheck[0] ?? null;
+    }
+
+    public function setUrlChecks(?array $urlChecks): void
+    {
+        $this->urlsCheck = $urlChecks;
+    }
+
     public function setId(int $id): void
     {
         $this->id = $id;
@@ -55,7 +71,7 @@ class Url
         return !is_null($this->getId());
     }
 
-    public function getUrlChecks(UrlCheckRepository $urlCheckRepo): array
+    public function getUrlChecksByUrlId(UrlCheckRepository $urlCheckRepo): array
     {
         return $urlCheckRepo->getUrlChecksByUrlId($this->id);
     }

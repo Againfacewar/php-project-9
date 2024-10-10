@@ -80,7 +80,7 @@ $app->get('/urls/{id}', function ($request, $response, $args) {
         [
         'url' => $url,
         'flash' => $messages,
-        'urlChecks' => $url->getUrlChecks($urlCheckRepository)
+        'urlChecks' => $url->getUrlChecksByUrlId($urlCheckRepository)
         ]
     );
 })->setName('urls.show');
@@ -140,7 +140,19 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) use ($rout
 
 $app->get('/urls', function ($request, $response) {
     $twig = $this->get(Twig::class);
-    $urls = $this->get(UrlRepository::class)->listUrls();
+    $urlRepository = $this->get(UrlRepository::class);
+    $urlCheckRepository = $this->get(UrlCheckRepository::class);
+    $urls = $urlRepository->listUrls();
+    if (!empty($urls)) {
+        $urls = collect($urls)->map(function ($url) use ($urlCheckRepository) {
+            $urlChecks = $url->getUrlChecksByUrlId($urlCheckRepository);
+            if (is_array($urlChecks)) {
+                $url->setUrlChecks($urlChecks);
+            }
+            return $url;
+        })->toArray();
+    }
+
 
     return $twig->render(
         $response,
