@@ -18,6 +18,7 @@ use Slim\Views\PhpRenderer;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
 
+session_start();
 $container = new Container();
 $container->set(Twig::class, function () {
     return Twig::create(__DIR__ . '/../resources/views');

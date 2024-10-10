@@ -9,7 +9,6 @@ class UrlRepository
     public function __construct(\PDO $conn)
     {
         $this->conn = $conn;
-        session_start();
     }
 
     public function listUrls(): array
