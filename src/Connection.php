@@ -2,6 +2,8 @@
 
 namespace Hexlet\Code;
 
+use Dotenv\Exception\InvalidPathException;
+
 class Connection
 {
     private static function buildDsn(string $scheme, string $host, string $port, string $dbName): string
@@ -11,12 +13,16 @@ class Connection
 
     public static function connect(string $dbUrl): ?\PDO
     {
-        $scheme = $_ENV['DB_CONNECTION'] ?? getenv('DB_CONNECTION');
-        $user = $_ENV['DB_USERNAME'] ?? getenv('DB_USERNAME');
-        $password = $_ENV['DB_PASSWORD'] ?? getenv('DB_PASSWORD');
-        $host = $_ENV['DB_HOST'] ?? getenv('DB_HOST');
-        $port = $_ENV['DB_PORT'] ?? getenv('DB_PORT');
-        $dbName = $_ENV['DB_DATABASE'] ?? getenv('DB_DATABASE');
+        try {
+            $scheme = $_ENV['DB_CONNECTION'] ?? getenv('DB_CONNECTION');
+            $user = $_ENV['DB_USERNAME'] ?? getenv('DB_USERNAME');
+            $password = $_ENV['DB_PASSWORD'] ?? getenv('DB_PASSWORD');
+            $host = $_ENV['DB_HOST'] ?? getenv('DB_HOST');
+            $port = $_ENV['DB_PORT'] ?? getenv('DB_PORT');
+            $dbName = $_ENV['DB_DATABASE'] ?? getenv('DB_DATABASE');
+        } catch (InvalidPathException $e) {
+            echo $e->getMessage();
+        }
 
         if ($dbUrl) {
             $databaseUrl = parse_url($dbUrl);
