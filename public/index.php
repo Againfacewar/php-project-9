@@ -28,7 +28,7 @@ $container->set('flash', function () {
 
 $container->set(\PDO::class, function () {
     $dbUrl = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL');
-    dump($dbUrl);
+
     try {
         $conn = Connection::connect($dbUrl);
 
