@@ -31,10 +31,8 @@
         <div class="mt-5 mb-3">
             <h2>Проверки</h2>
         </div>
-{#        <form method="post" action="{{ url_for('urls.check', {'id' : url.getId()}) }}">#}
-{#            <input type="submit" class="btn btn-primary" value="Запустить проверку">#}
-{#        </form>#}
-        <form method="post" action="" class="mb-3">
+
+        <form method="post" action="{{ url_for('urls.checks', {'id': url.getId()}) }}" class="mb-3">
             <input type="submit" class="btn btn-primary" value="Запустить проверку">
         </form>
         <table class="table table-bordered table-hover" data-test="checks">
@@ -49,7 +47,16 @@
             </tr>
             </thead>
             <tbody>
-
+            {% for item in urlChecks %}
+                <tr>
+                    <td>{{ item.getId() }}</td>
+                    <td>{{ item.getStatusCode()|default('') }}</td>
+                    <td>{{ item.getH1()|default('') }}</td>
+                    <td>{{ item.getTitle()|default('') }}</td>
+                    <td>{{ item.getDescription()|default('') }}</td>
+                    <td>{{ item.getCreatedAt()|default('') }}</td>
+                </tr>
+            {% endfor %}
             </tbody>
         </table>
     </section>

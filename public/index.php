@@ -8,6 +8,8 @@ use DI\Container;
 use Dotenv\Dotenv;
 use Hexlet\Code\Connection;
 use Hexlet\Code\Url;
+use Hexlet\Code\UrlCheck;
+use Hexlet\Code\UrlCheckRepository;
 use Hexlet\Code\UrlRepository;
 use Slim\Factory\AppFactory;
 use Slim\Flash\Messages;
@@ -63,6 +65,7 @@ $app->get('/', function ($request, $response) {
 $app->get('/urls/{id}', function ($request, $response, $args) {
     $twig = $this->get(Twig::class);
     $urlRepository = $this->get(UrlRepository::class);
+    $urlCheckRepository = $this->get(UrlCheckRepository::class);
     $id = $args['id'];
     $url = $urlRepository->find($id);
 
@@ -76,7 +79,8 @@ $app->get('/urls/{id}', function ($request, $response, $args) {
         'show.html.twig',
         [
         'url' => $url,
-        'flash' => $messages
+        'flash' => $messages,
+        'urlChecks' => $url->getUrlChecks($urlCheckRepository)
         ]
     );
 })->setName('urls.show');
@@ -117,10 +121,26 @@ $app->post('/urls', function ($request, $response) use ($router) {
     );
 })->setName('urls.store');
 
+$app->post('/urls/{id}/checks', function ($request, $response, $args) use ($router) {
+    $id = $args['id'];
+    $urlRepository = $this->get(UrlRepository::class);
+    $urlCheckRepository = $this->get(UrlCheckRepository::class);
+    $url = $urlRepository->find($id);
+
+    if (!$url) {
+        return $response->write('Page not found')->withStatus(404);
+    }
+
+    $urlCheck = UrlCheck::fromArray([$id, null, null, null, null, Carbon::now()]);
+    $urlCheckRepository->save($urlCheck);
+    $this->get('flash')->addMessage('success', 'Страница успешно проверена');
+
+    return $response->withRedirect($router->urlFor('urls.show', ['id' => $id]));
+})->setName('urls.checks');
+
 $app->get('/urls', function ($request, $response) {
     $twig = $this->get(Twig::class);
     $urls = $this->get(UrlRepository::class)->listUrls();
-
 
     return $twig->render(
         $response,

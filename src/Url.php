@@ -55,6 +55,11 @@ class Url
         return !is_null($this->getId());
     }
 
+    public function getUrlChecks(UrlCheckRepository $urlCheckRepo): array
+    {
+        return $urlCheckRepo->getUrlChecksByUrlId($this->id);
+    }
+
     public static function normalizeUrl(string $url): string
     {
         $parsedUrl = parse_url(trim($url));
