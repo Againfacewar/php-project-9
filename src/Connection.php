@@ -2,6 +2,7 @@
 
 namespace Hexlet\Code;
 
+use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 
 class Connection
@@ -13,6 +14,8 @@ class Connection
 
     public static function connect(string $dbUrl): ?\PDO
     {
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+        $dotenv->load();
         try {
             $scheme = $_ENV['DB_CONNECTION'] ?? getenv('DB_CONNECTION');
             $user = $_ENV['DB_USERNAME'] ?? getenv('DB_USERNAME');

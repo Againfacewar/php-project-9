@@ -27,8 +27,6 @@ $container->set('flash', function () {
 });
 
 $container->set(\PDO::class, function () {
-    $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
-    $dotenv->load();
     $dbUrl = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL');
     try {
         $conn = Connection::connect($dbUrl);
