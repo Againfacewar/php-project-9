@@ -6,6 +6,9 @@ require __DIR__ . '/../vendor/autoload.php';
 use Carbon\Carbon;
 use DI\Container;
 use Dotenv\Dotenv;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
 use Hexlet\Code\Connection;
 use Hexlet\Code\Url;
 use Hexlet\Code\UrlCheck;
@@ -40,6 +43,11 @@ $container->set(\PDO::class, function () {
         error_log($e->getMessage());
     }
 });
+
+$container->set(Client::class, function () {
+    return new Client();
+});
+
 $app = AppFactory::createFromContainer($container);
 $router = $app->getRouteCollector()->getRouteParser();
 $app->add(MethodOverrideMiddleware::class);
@@ -126,12 +134,30 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) use ($rout
     $urlRepository = $this->get(UrlRepository::class);
     $urlCheckRepository = $this->get(UrlCheckRepository::class);
     $url = $urlRepository->find($id);
+    $client = $this->get(Client::class);
+    $statusCode = null;
 
     if (!$url) {
         return $response->write('Page not found')->withStatus(404);
     }
 
-    $urlCheck = UrlCheck::fromArray([$id, null, null, null, null, Carbon::now()]);
+    try {
+        $res = $client->request('GET', $url->getName());
+        $statusCode = $res->getStatusCode();
+    } catch (ConnectException $e) {
+        error_log($e->getMessage());
+        $this->get('flash')->addMessage('success', 'Network error: ' . $e->getMessage());
+        return $response->withRedirect($router->urlFor('urls.show', ['id' => $id]));
+    } catch (ClientException $e) {
+        if ($e->hasResponse()) {
+            $statusCode = $e->getResponse()->getStatusCode();
+            error_log($e->getMessage());
+        } else {
+            error_log($e->getMessage());
+        }
+    }
+
+    $urlCheck = UrlCheck::fromArray([$id, $statusCode, null, null, null, Carbon::now()]);
     $urlCheckRepository->save($urlCheck);
     $this->get('flash')->addMessage('success', 'Страница успешно проверена');
 
