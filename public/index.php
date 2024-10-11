@@ -5,6 +5,8 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Carbon\Carbon;
 use DI\Container;
+use DiDom\Document;
+use DiDom\Query;
 use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -30,6 +32,10 @@ $container->set(Twig::class, function () {
 });
 $container->set('flash', function () {
     return new Messages();
+});
+
+$container->set(Document::class, function () {
+    return new Document();
 });
 
 $container->set(\PDO::class, function () {
@@ -109,7 +115,7 @@ $app->post('/urls', function ($request, $response) use ($router) {
         $data['name'] = Url::normalizeUrl($data['name']);
         $url = $urlRepository->findByName($data['name']);
         if ($url) {
-            $this->get('flash')->addMessage('success', 'Страница уже существует!');
+            $this->get('flash')->addMessage('error', 'Страница уже существует!');
         } else {
             $url = Url::fromArray([$data['name'], Carbon::now()]);
             $urlRepository->save($url);
@@ -129,26 +135,37 @@ $app->post('/urls', function ($request, $response) use ($router) {
     );
 })->setName('urls.store');
 
-$app->post('/urls/{id}/checks', function ($request, $response, $args) use ($router) {
+$app->post('/urls/{id}/checks', callable: function ($request, $response, $args) use ($router) {
     $id = $args['id'];
     $urlRepository = $this->get(UrlRepository::class);
     $urlCheckRepository = $this->get(UrlCheckRepository::class);
+    /** @var Document $document */
+    $document = $this->get(Document::class);
     $url = $urlRepository->find($id);
     $client = $this->get(Client::class);
     $statusCode = null;
+    $h1 = null;
+    $title = null;
+    $description = null;
+    $body = null;
 
     if (!$url) {
         return $response->write('Page not found')->withStatus(404);
     }
 
     try {
+        /** @var \GuzzleHttp\Psr7\Response $res */
         $res = $client->request('GET', $url->getName());
         $statusCode = $res->getStatusCode();
+        $body = $res->getBody()->getContents();
+        $this->get('flash')->addMessage('success', 'Страница успешно проверена');
     } catch (ConnectException $e) {
         error_log($e->getMessage());
-        $this->get('flash')->addMessage('success', 'Network error: ' . $e->getMessage());
+        $this->get('flash')->addMessage('error', "Произошла ошибка при проверке, не удалось подключиться");
+
         return $response->withRedirect($router->urlFor('urls.show', ['id' => $id]));
     } catch (ClientException $e) {
+        $this->get('flash')->addMessage('warning', 'Проверка была выполнена успешно, но сервер ответил с ошибкой');
         if ($e->hasResponse()) {
             $statusCode = $e->getResponse()->getStatusCode();
             error_log($e->getMessage());
@@ -157,9 +174,17 @@ $app->post('/urls/{id}/checks', function ($request, $response, $args) use ($rout
         }
     }
 
-    $urlCheck = UrlCheck::fromArray([$id, $statusCode, null, null, null, Carbon::now()]);
+    if ($body) {
+        $document->loadHtml($body);
+        $h1 = optional($document->first('h1'))->text();
+        $title = optional($document->first('title'))->text();
+        $description = optional($document
+            ->first("//meta[contains(@name, 'description')]", Query::TYPE_XPATH))
+            ->getAttribute('content');
+    }
+
+    $urlCheck = UrlCheck::fromArray([$id, $statusCode, $h1, $title, $description, Carbon::now()]);
     $urlCheckRepository->save($urlCheck);
-    $this->get('flash')->addMessage('success', 'Страница успешно проверена');
 
     return $response->withRedirect($router->urlFor('urls.show', ['id' => $id]));
 })->setName('urls.checks');

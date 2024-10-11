@@ -95,7 +95,7 @@ class UrlCheck
     public function setDescription(?string $description): void
     {
         if ($description) {
-            $this->title = $description;
+            $this->description = $description;
         }
     }
 
