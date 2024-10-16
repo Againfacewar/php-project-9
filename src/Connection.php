@@ -14,7 +14,12 @@ class Connection
 
     public static function connect(string $dbUrl): ?\PDO
     {
+        $dbName = '';
+        $host = '';
+        $port = 5432;
         $scheme = 'pgsql';
+        $user = '';
+        $password = '';
         try {
             $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
             $dotenv->load();

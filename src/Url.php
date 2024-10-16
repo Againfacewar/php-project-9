@@ -6,7 +6,7 @@ use Carbon\Carbon;
 
 class Url
 {
-    private array $urlsCheck = [];
+    private ?array $urlsCheck = [];
     private ?int $id = null;
     private ?string $name = null;
     private ?string $created_at = null;

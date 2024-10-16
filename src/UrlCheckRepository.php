@@ -38,9 +38,7 @@ class UrlCheckRepository
 
     public function save(UrlCheck $urlCheck): void
     {
-        if ($urlCheck->exists()) {
-            $this->update($urlCheck);
-        } else {
+        if (!$urlCheck->exists()) {
             $this->create($urlCheck);
         }
     }
@@ -71,7 +69,7 @@ class UrlCheckRepository
         $urlCheck->setId($id);
     }
 
-    public function getUrlChecksByUrlId(int $urlId): array
+    public function getUrlChecksByUrlId(?int $urlId): array
     {
         $sql = 'SELECT * FROM url_checks WHERE url_id = ? ORDER BY created_at DESC';
         $stmt = $this->conn->prepare($sql);

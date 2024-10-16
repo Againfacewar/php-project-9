@@ -6,11 +6,13 @@ require __DIR__ . '/../vendor/autoload.php';
 use Carbon\Carbon;
 use DI\Container;
 use DiDom\Document;
+use DiDom\Element;
 use DiDom\Query;
 use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
 use Hexlet\Code\Connection;
 use Hexlet\Code\Url;
 use Hexlet\Code\UrlCheck;
@@ -164,7 +166,7 @@ $app->post('/urls/{id}/checks', callable: function ($request, $response, $args) 
         $this->get('flash')->addMessage('error', "Произошла ошибка при проверке, не удалось подключиться");
 
         return $response->withRedirect($router->urlFor('urls.show', ['id' => $id]));
-    } catch (ClientException $e) {
+    } catch (ClientException|RequestException $e) {
         $this->get('flash')->addMessage('warning', 'Проверка была выполнена успешно, но сервер ответил с ошибкой');
         if ($e->hasResponse()) {
             $statusCode = $e->getResponse()->getStatusCode();
@@ -178,9 +180,10 @@ $app->post('/urls/{id}/checks', callable: function ($request, $response, $args) 
         $document->loadHtml($body);
         $h1 = optional($document->first('h1'))->text();
         $title = optional($document->first('title'))->text();
-        $description = optional($document
-            ->first("//meta[contains(@name, 'description')]", Query::TYPE_XPATH))
-            ->getAttribute('content');
+        /** @var Element|null $element */
+        $element = $document->first("//meta[contains(@name, 'description')]", Query::TYPE_XPATH);
+
+        $description = optional($element)->getAttribute('content');
     }
 
     $urlCheck = UrlCheck::fromArray([$id, $statusCode, $h1, $title, $description, Carbon::now()]);
@@ -195,13 +198,15 @@ $app->get('/urls', function ($request, $response) {
     $urlCheckRepository = $this->get(UrlCheckRepository::class);
     $urls = $urlRepository->listUrls();
     if (!empty($urls)) {
-        $urls = collect($urls)->map(function ($url) use ($urlCheckRepository) {
+        /** @var \Illuminate\Support\Collection<int, Url> $urlCollection */
+        $urlCollection = collect($urls)->map(function ($url) use ($urlCheckRepository) {
             $urlChecks = $url->getUrlChecksByUrlId($urlCheckRepository);
             if (is_array($urlChecks)) {
                 $url->setUrlChecks($urlChecks);
             }
             return $url;
-        })->toArray();
+        });
+        $urls = $urlCollection->toArray();
     }
 
 
