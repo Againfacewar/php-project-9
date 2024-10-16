@@ -166,7 +166,7 @@ $app->post('/urls/{id}/checks', callable: function ($request, $response, $args) 
         $this->get('flash')->addMessage('error', "Произошла ошибка при проверке, не удалось подключиться");
 
         return $response->withRedirect($router->urlFor('urls.show', ['id' => $id]));
-    } catch (ClientException|RequestException $e) {
+    } catch (ClientException | RequestException $e) {
         $this->get('flash')->addMessage('warning', 'Проверка была выполнена успешно, но сервер ответил с ошибкой');
         if ($e->hasResponse()) {
             $statusCode = $e->getResponse()->getStatusCode();
