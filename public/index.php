@@ -201,8 +201,10 @@ $app->get('/urls', function ($request, $response) {
     /** @var Url[] $urls */
     $urls = $urlRepository->listUrls();
 
-    /** @var Collection<int, Url> $urlCollection */
     if (!empty($urls)) {
+        /** @param Collection<int, Url> $urlCollection
+         * @return Collection<int, Url>|null
+         */
         $urlCollection = collect($urls)->map(function (Url $url) use ($urlCheckRepository) {
             $urlChecks = $url->getUrlChecksByUrlId($urlCheckRepository);
             if (!empty($urlChecks)) {
