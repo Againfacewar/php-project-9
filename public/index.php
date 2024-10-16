@@ -199,14 +199,9 @@ $app->get('/urls', function ($request, $response) {
     $urlCheckRepository = $this->get(UrlCheckRepository::class);
     $urls = $urlRepository->listUrls();
     if (!empty($urls)) {
-        /**
-         * @template T
-         * @param T[] $urlCollection
-         * @return T|null
-         */
-        $urlCollection = collect($urls)->map(function ($url) use ($urlCheckRepository) {
+        $urlCollection = collect($urls)->map(function (Url $url) use ($urlCheckRepository) {
             $urlChecks = $url->getUrlChecksByUrlId($urlCheckRepository);
-            if (is_array($urlChecks)) {
+            if (!empty($urlChecks)) {
                 $url->setUrlChecks($urlChecks);
             }
             return $url;
