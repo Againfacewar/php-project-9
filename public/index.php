@@ -166,14 +166,15 @@ $app->post('/urls/{id}/checks', callable: function ($request, $response, $args) 
         $this->get('flash')->addMessage('error', "Произошла ошибка при проверке, не удалось подключиться");
 
         return $response->withRedirect($router->urlFor('urls.show', ['id' => $id]));
-    } catch (ClientException | RequestException $e) {
+    } catch (ClientException $e) {
         $this->get('flash')->addMessage('warning', 'Проверка была выполнена успешно, но сервер ответил с ошибкой');
         if ($e->hasResponse()) {
             $statusCode = $e->getResponse()->getStatusCode();
-            error_log($e->getMessage());
-        } else {
-            error_log($e->getMessage());
         }
+        error_log($e->getMessage());
+    } catch (RequestException $e) {
+        $this->get('flash')->addMessage('warning', 'Проверка была выполнена успешно, но сервер ответил с ошибкой');
+        error_log($e->getMessage());
     }
 
     if ($body) {
@@ -183,7 +184,7 @@ $app->post('/urls/{id}/checks', callable: function ($request, $response, $args) 
         /** @var Element|null $element */
         $element = $document->first("//meta[contains(@name, 'description')]", Query::TYPE_XPATH);
 
-        $description = optional($element)->getAttribute('content');
+        $description = $element?->getAttribute('content');
     }
 
     $urlCheck = UrlCheck::fromArray([$id, $statusCode, $h1, $title, $description, Carbon::now()]);
@@ -198,7 +199,6 @@ $app->get('/urls', function ($request, $response) {
     $urlCheckRepository = $this->get(UrlCheckRepository::class);
     $urls = $urlRepository->listUrls();
     if (!empty($urls)) {
-        /** @var \Illuminate\Support\Collection<int, Url> $urlCollection */
         $urlCollection = collect($urls)->map(function ($url) use ($urlCheckRepository) {
             $urlChecks = $url->getUrlChecksByUrlId($urlCheckRepository);
             if (is_array($urlChecks)) {
