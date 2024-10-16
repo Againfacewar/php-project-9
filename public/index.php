@@ -18,6 +18,7 @@ use Hexlet\Code\Url;
 use Hexlet\Code\UrlCheck;
 use Hexlet\Code\UrlCheckRepository;
 use Hexlet\Code\UrlRepository;
+use Illuminate\Support\Collection;
 use Slim\Factory\AppFactory;
 use Slim\Flash\Messages;
 use Slim\Http\Response;
@@ -197,7 +198,10 @@ $app->get('/urls', function ($request, $response) {
     $twig = $this->get(Twig::class);
     $urlRepository = $this->get(UrlRepository::class);
     $urlCheckRepository = $this->get(UrlCheckRepository::class);
+    /** @var Url[] $urls */
     $urls = $urlRepository->listUrls();
+
+    /** @var Collection<int, Url> $urlCollection */
     if (!empty($urls)) {
         $urlCollection = collect($urls)->map(function (Url $url) use ($urlCheckRepository) {
             $urlChecks = $url->getUrlChecksByUrlId($urlCheckRepository);
