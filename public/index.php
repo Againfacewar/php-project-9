@@ -46,12 +46,12 @@ $container->set(\PDO::class, function () {
     $dbUrl = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL');
 
     try {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
-        $dotenv->load();
         if ($dbUrl) {
             $conn = Connection::createFromUrl($dbUrl);
-            dump($conn);
         } else {
+            $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+            $dotenv->load();
+
             $conn = new Connection(
                 $_ENV['DB_HOST'] ?? getenv('DB_HOST'),
                 $_ENV['DB_DATABASE'] ?? getenv('DB_DATABASE'),
