@@ -50,6 +50,7 @@ $container->set(\PDO::class, function () {
         $dotenv->load();
         if ($dbUrl) {
             $conn = Connection::createFromUrl($dbUrl);
+            dump($conn);
         } else {
             $conn = new Connection(
                 $_ENV['DB_HOST'] ?? getenv('DB_HOST'),
