@@ -5,25 +5,23 @@ namespace Hexlet\Code;
 class UrlCheck
 {
     private ?int $id = null;
-    private ?int $urlId = null;
-    private ?string $statusCode = null;
-    private ?string $h1 = null;
-    private ?string $title = null;
-    private ?string $description = null;
-    private ?string $createdAt = null;
+
+
+    public function __construct(
+        public readonly int $urlId,
+        public readonly string $createdAt,
+        public readonly ?string $statusCode = null,
+        public readonly ?string $h1 = null,
+        public readonly ?string $title = null,
+        public readonly ?string $description = null
+    ) {
+    }
 
     public static function fromArray(array $data): UrlCheck
     {
         [$urlId, $statusCode, $h1, $title, $description, $createdAt] = $data;
-        $url = new self();
-        $url->setUrlId($urlId);
-        $url->setStatusCode($statusCode);
-        $url->setH1($h1);
-        $url->setTitle($title);
-        $url->setDescription($description);
-        $url->setCreatedAt($createdAt);
 
-        return $url;
+        return new self($urlId, $createdAt, $statusCode, $h1, $title, $description);
     }
 
     public function getId(): ?int
@@ -31,77 +29,9 @@ class UrlCheck
         return $this->id;
     }
 
-    public function getUrlId(): ?string
-    {
-        return $this->urlId;
-    }
-
-    public function getCreatedAt(): ?string
-    {
-        return $this->createdAt;
-    }
-
-    public function getStatusCode(): ?string
-    {
-        return $this->statusCode;
-    }
-
-    public function getH1(): ?string
-    {
-        return $this->h1;
-    }
-
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
     public function setId(int $id): void
     {
         $this->id = $id;
-    }
-
-    public function setUrlId(int $urlId): void
-    {
-        $this->urlId = $urlId;
-    }
-
-    public function setStatusCode(?string $statusCode): void
-    {
-        if ($statusCode) {
-            $this->statusCode = $statusCode;
-        }
-    }
-
-    public function setH1(?string $h1): void
-    {
-        if ($h1) {
-            $this->h1 = $h1;
-        }
-    }
-
-    public function setTitle(?string $title): void
-    {
-        if ($title) {
-            $this->title = $title;
-        }
-    }
-
-    public function setDescription(?string $description): void
-    {
-        if ($description) {
-            $this->description = $description;
-        }
-    }
-
-    public function setCreatedAt(string $createdAt): void
-    {
-        $this->createdAt = $createdAt;
     }
 
     public function exists(): bool

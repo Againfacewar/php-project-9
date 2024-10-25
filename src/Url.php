@@ -6,19 +6,19 @@ use Carbon\Carbon;
 
 class Url
 {
-    private ?array $urlsCheck = [];
-    private ?int $id = null;
-    private ?string $name = null;
-    private ?string $created_at = null;
+    public function __construct(
+        public readonly string $name,
+        public readonly string $created_at,
+        private ?int $id = null,
+        private ?array $urlsCheck = []
+    ) {
+    }
 
     public static function fromArray(array $data): Url
     {
         [$name, $createdAt] = $data;
-        $url = new Url();
-        $url->setName($name);
-        $url->setCreatedAt($createdAt);
 
-        return $url;
+        return new Url($name, $createdAt);
     }
 
     public function getId(): ?int
@@ -26,15 +26,6 @@ class Url
         return $this->id;
     }
 
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function getCreatedAt(): ?string
-    {
-        return $this->created_at;
-    }
 
     public function getUrlChecks(): ?array
     {
@@ -54,16 +45,6 @@ class Url
     public function setId(int $id): void
     {
         $this->id = $id;
-    }
-
-    public function setName(string $name): void
-    {
-        $this->name = $name;
-    }
-
-    public function setCreatedAt(string $createdAt): void
-    {
-        $this->created_at = $createdAt;
     }
 
     public function exists(): bool

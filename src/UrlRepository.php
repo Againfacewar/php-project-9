@@ -70,7 +70,7 @@ class UrlRepository
         $sql = "UPDATE urls SET name = :name WHERE id = :id";
         $stmt = $this->conn->prepare($sql);
         $id = $url->getId();
-        $name = $url->getName();
+        $name = $url->name;
 
         $stmt->execute(['name' => $name, 'id' => $id]);
     }
@@ -79,8 +79,8 @@ class UrlRepository
     {
         $sql = "INSERT INTO urls (name, created_at) VALUES (:name, :created_at)";
         $stmt = $this->conn->prepare($sql);
-        $name = $url->getName();
-        $createdAt = $url->getCreatedAt();
+        $name = $url->name;
+        $createdAt = $url->created_at;
         $stmt->execute(['name' => $name, 'created_at' => $createdAt]);
         $id = (int) $this->conn->lastInsertId();
         $url->setId($id);

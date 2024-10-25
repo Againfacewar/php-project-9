@@ -16,7 +16,7 @@
     {% endif %}
     <section class="container-lg mt-3">
         <div>
-            <h1>Сайт: {{ url.getName() }}</h1>
+            <h1>Сайт: {{ url.name }}</h1>
         </div>
         <div class="table-responsive">
             <table class="table table-bordered table-hover text-nowrap" data-test="url">
@@ -27,11 +27,11 @@
                 </tr>
                 <tr>
                     <td>Имя</td>
-                    <td>{{ url.getName() }}</td>
+                    <td>{{ url.name }}</td>
                 </tr>
                 <tr>
                     <td>Дата создания</td>
-                    <td>{{ url.getCreatedAt() }}</td>
+                    <td>{{ url.created_at }}</td>
                 </tr>
                 </tbody>
             </table>
@@ -58,11 +58,11 @@
             {% for item in urlChecks %}
                 <tr>
                     <td>{{ item.getId() }}</td>
-                    <td>{{ item.getStatusCode()|default('') }}</td>
-                    <td>{{ item.getH1()|default('') }}</td>
-                    <td>{{ item.getTitle()|default('') }}</td>
-                    <td>{{ item.getDescription()|default('') }}</td>
-                    <td>{{ item.getCreatedAt()|default('') }}</td>
+                    <td>{{ item.statusCode|default('') }}</td>
+                    <td>{{ item.h1|default('') }}</td>
+                    <td>{{ item.title|default('') }}</td>
+                    <td>{{ item.description|default('') }}</td>
+                    <td>{{ item.createdAt|default('') }}</td>
                 </tr>
             {% endfor %}
             </tbody>

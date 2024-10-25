@@ -48,12 +48,12 @@ class UrlCheckRepository
         $sql = "INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at)
             VALUES (:urlId, :statusCode, :h1, :title, :description, :createdAt)";
         $stmt = $this->conn->prepare($sql);
-        $urlId = $urlCheck->getUrlId();
-        $statusCode = $urlCheck->getStatusCode();
-        $h1 = $urlCheck->getH1();
-        $title = $urlCheck->getTitle();
-        $desc = $urlCheck->getDescription();
-        $createdAt = $urlCheck->getCreatedAt();
+        $urlId = $urlCheck->urlId;
+        $statusCode = $urlCheck->statusCode;
+        $h1 = $urlCheck->h1;
+        $title = $urlCheck->title;
+        $desc = $urlCheck->description;
+        $createdAt = $urlCheck->createdAt;
         $stmt->execute(
             [
                 'urlId' => $urlId,

@@ -24,8 +24,8 @@
                         {{ url.getName() }}
                     </a>
                 </td>
-                <td>{{ url.getLastUrlCheck().getCreatedAt()}}</td>
-                <td>{{ url.getLastUrlCheck().getStatusCode()}}</td>
+                <td>{{ url.getLastUrlCheck().createdAt}}</td>
+                <td>{{ url.getLastUrlCheck().statusCode}}</td>
             </tr>
             {% endfor %}
             </tbody>

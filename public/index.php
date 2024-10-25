@@ -9,6 +9,7 @@ use DiDom\Document;
 use DiDom\Element;
 use DiDom\Query;
 use Dotenv\Dotenv;
+use Dotenv\Exception\InvalidPathException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
@@ -45,11 +46,24 @@ $container->set(\PDO::class, function () {
     $dbUrl = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL');
 
     try {
-        $conn = Connection::connect($dbUrl);
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+        $dotenv->load();
+        if ($dbUrl) {
+            $conn = Connection::createFromUrl($dbUrl);
+        } else {
+            $conn = new Connection(
+                $_ENV['DB_HOST'] ?? getenv('DB_HOST'),
+                $_ENV['DB_DATABASE'] ?? getenv('DB_DATABASE'),
+                $_ENV['DB_USERNAME'] ?? getenv('DB_USERNAME'),
+                $_ENV['DB_PASSWORD'] ?? getenv('DB_PASSWORD'),
+                $_ENV['DB_PORT'] ?? getenv('DB_PORT'),
+            );
+        }
 
-        return $conn;
-    } catch (\PDOException $e) {
+        return $conn->connect();
+    } catch (\PDOException | InvalidPathException $e) {
         error_log($e->getMessage());
+        dump($e->getMessage());
     }
 });
 
@@ -95,9 +109,9 @@ $app->get('/urls/{id}', function ($request, $response, $args) {
         $response,
         'show.html.twig',
         [
-        'url' => $url,
-        'flash' => $messages,
-        'urlChecks' => $url->getUrlChecksByUrlId($urlCheckRepository)
+            'url' => $url,
+            'flash' => $messages,
+            'urlChecks' => $url->getUrlChecksByUrlId($urlCheckRepository)
         ]
     );
 })->setName('urls.show');
@@ -158,7 +172,7 @@ $app->post('/urls/{id}/checks', callable: function ($request, $response, $args) 
 
     try {
         /** @var \GuzzleHttp\Psr7\Response $res */
-        $res = $client->request('GET', $url->getName());
+        $res = $client->request('GET', $url->name);
         $statusCode = $res->getStatusCode();
         $body = $res->getBody()->getContents();
         $this->get('flash')->addMessage('success', 'Страница успешно проверена');
