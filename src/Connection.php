@@ -21,7 +21,7 @@ class Connection
 
     private function buildDsn(): string
     {
-        return "$this->scheme:host=$this->host;port=$this->port;dbname=$this->dbName";
+        return "{$this->scheme}:host={$this->host};port={$this->port};dbname={$this->dbName}";
     }
 
     public function connect(): ?\PDO

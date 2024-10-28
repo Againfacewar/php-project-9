@@ -21,7 +21,7 @@
                 <td>{{ url.getId() }}</td>
                 <td>
                     <a href="{{ url_for('urls.show', {'id': url.getId()}) }}">
-                        {{ url.getName() }}
+                        {{ url.name }}
                     </a>
                 </td>
                 <td>{{ url.getLastUrlCheck().createdAt}}</td>

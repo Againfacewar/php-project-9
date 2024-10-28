@@ -172,7 +172,7 @@ $app->post('/urls/{id}/checks', callable: function ($request, $response, $args) 
     }
 
     try {
-        /** @var \GuzzleHttp\Psr7\Response $res */
+        /** @var \make leHttp\Psr7\Response $res */
         $res = $client->request('GET', $url->name);
         $statusCode = $res->getStatusCode();
         $body = $res->getBody()->getContents();
@@ -196,6 +196,9 @@ $app->post('/urls/{id}/checks', callable: function ($request, $response, $args) 
     if ($body) {
         $document->loadHtml($body);
         $h1 = optional($document->first('h1'))->text();
+        if ($h1 && mb_strlen($h1) >= 255) {
+            $h1 = null;
+        }
         $title = optional($document->first('title'))->text();
         /** @var Element|null $element */
         $element = $document->first("//meta[contains(@name, 'description')]", Query::TYPE_XPATH);
