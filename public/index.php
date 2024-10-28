@@ -172,7 +172,7 @@ $app->post('/urls/{id}/checks', callable: function ($request, $response, $args) 
     }
 
     try {
-        /** @var \make leHttp\Psr7\Response $res */
+        /** @var \GuzzleHttp\Psr7\Response $res */
         $res = $client->request('GET', $url->name);
         $statusCode = $res->getStatusCode();
         $body = $res->getBody()->getContents();
